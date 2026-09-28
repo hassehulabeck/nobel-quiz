@@ -11,10 +11,10 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 
 - [x] **0.1** Init Next.js (App Router, TypeScript) project — actually Next.js 16.3.6/React 19.2.8, the current stable at build time, not 14; add Tailwind CSS v4; add Prisma 7.10.0; add ESLint + Prettier.
   **Verify:** `npm run dev` serves a blank page at `/` with no console errors (confirmed — `200` from a local curl); `npm run build` succeeds (confirmed, static prerender of `/`). shadcn/ui init deferred to Phase 7 when there's an actual UI to skin.
-- [ ] **0.2** Add Railway project with a Postgres plugin attached to the app service; wire `DATABASE_URL`. **Blocked on Railway credentials from the user.**
+- [ ] **0.2** Add Railway project with a Postgres plugin attached to the app service; wire `DATABASE_URL`. **Partially blocked:** the user supplied a `PRODUCTION_DATABASE_URL`, but it's Railway's `postgres.railway.internal` *private*-network hostname, which only resolves from inside another Railway service — confirmed unreachable (`ENOTFOUND`) from outside Railway. Need the public `xxxxx.proxy.rlwy.net` connection string instead (Railway dashboard → Postgres service → Connect).
   **Verify:** `prisma db pull` (or a trivial `SELECT 1`) succeeds against the Railway Postgres instance from a local shell using the Railway-provided connection string. (A local Homebrew Postgres 14 scratch DB, `nobel_quiz_dev`, stands in for this until Railway is wired up — see METHODS.md.)
-- [ ] **0.3** Add Resend API key as an env var; send one test email via a throwaway script. **Blocked on a Resend API key from the user.**
-  **Verify:** a test email arrives in an inbox you control, sent through the Resend API using the project's env var.
+- [x] **0.3** Add Resend API key as an env var; send one test email via a throwaway script.
+  **Verify:** confirmed 2026-09-28 — a real test email sent via the Resend API (id `01a0e76b-b27f-759b-9925-f6321b67e2a8`) arrived at an inbox the user controls. Sent from Resend's shared `onboarding@resend.dev` sender rather than the account's custom domain (`mail.hulabeck.se`), whose verification status is "failed" — user chose to proceed with the shared sender for now rather than fix DNS immediately; see METHODS.md.
 - [x] **0.4** Set up `instrumentation.ts` scaffold with a no-op interval (proves the "always-on process" assumption holds on Railway before real scraping logic is built on top of it).
   **Verify:** locally confirmed `register()` runs once at `next dev` startup with no errors (log line observed, process stayed up, `/` kept responding). The full "10+ minutes on Railway without restarting" check is inherently a Railway-only check — re-verify once 9.1 deploys.
 
