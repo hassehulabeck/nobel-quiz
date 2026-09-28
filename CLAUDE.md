@@ -8,3 +8,9 @@
 1. For each task or set of related tasks, create a verification condition. Add that to the corresponding tasks/set of tasks in `TASKS.md`.
 1. Security should be "regular", users log in with email, password and verification mail (resend account exists).
 
+# Framework/tooling agent notes
+
+The scaffolding tools for this project (`create-next-app`, `prisma init`) generate their own up-to-date guidance for working with their current, post-training-cutoff APIs. Load these before writing framework or Prisma code:
+- `@AGENTS.md` — Next.js 16 API notes (regenerated automatically by `next dev`/`next build`; safe to keep committed).
+- `.agents/skills/` — Prisma 7 skill references (schema/config/driver-adapter changes, CLI usage, client API). See `METHODS.md`'s "Implementation notes" section for what's already been learned from them.
+

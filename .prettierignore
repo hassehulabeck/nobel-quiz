@@ -1,0 +1,15 @@
+# Vendored agent skill docs (not ours to reformat)
+.agents/
+.claude/skills/
+.windsurf/skills/
+
+# Project source-of-truth docs (author's own formatting)
+CLAUDE.md
+instructions.md
+nobeldata.md
+METHODS.md
+TASKS.md
+
+# Generated
+src/generated/
+prisma/migrations/

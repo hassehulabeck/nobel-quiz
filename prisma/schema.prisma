@@ -1,0 +1,158 @@
+// Nobel Quiz data model — see METHODS.md for the architecture decisions behind these choices.
+// learn more about the schema format: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PrizeKey {
+  PHYSICS
+  CHEMISTRY
+  MEDICINE
+  ECONOMICS
+  LITERATURE
+  PEACE
+}
+
+enum QuestionScope {
+  PRIZE_SPECIFIC
+  WHOLE_WEEK
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum ResultStatus {
+  PENDING
+  PROPOSED
+  APPROVED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  displayName   String    @unique
+  emailVerified Boolean   @default(false)
+  isAdmin       Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  sessions           Session[]
+  verificationTokens VerificationToken[]
+  submissions        Submission[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+/// The six real Nobel prize categories for 2026, each with its official
+/// announcement time (stored in UTC — see METHODS.md's timezone section).
+model PrizeCategory {
+  id             String   @id @default(cuid())
+  key            PrizeKey @unique
+  name           String
+  announcementAt DateTime
+
+  questions Question[]
+}
+
+/// A single quiz question. `PRIZE_SPECIFIC` questions are graded from that
+/// prize's own scraped result; `WHOLE_WEEK` questions (prizeId null) span
+/// all six prizes and share the Physics deadline, but can only be graded
+/// once every relevant prize has been announced.
+model Question {
+  id             String         @id @default(cuid())
+  prizeId        String?
+  prize          PrizeCategory? @relation(fields: [prizeId], references: [id])
+  scope          QuestionScope
+  text           String
+  answerDeadline DateTime
+  sortOrder      Int            @default(0)
+
+  options     AnswerOption[]
+  submissions Submission[]
+  result      Result?
+
+  @@index([prizeId])
+}
+
+/// One selectable answer for a question, carrying the historical
+/// frequency it was derived from (nobeldata.md, 2006-2025) and the
+/// precomputed points = 1 / (historicalCount / historicalTotal).
+model AnswerOption {
+  id              String   @id @default(cuid())
+  questionId      String
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  label           String
+  historicalCount Int
+  historicalTotal Int
+  points          Decimal  @db.Decimal(6, 3)
+  sortOrder       Int      @default(0)
+
+  submissions      Submission[]
+  resultsAsCorrect Result[]     @relation("CorrectOption")
+
+  @@index([questionId])
+}
+
+/// A user's current pick for a question. Editable (upserted) until the
+/// question's answerDeadline; one row per (user, question).
+model Submission {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerOptionId String
+  answerOption   AnswerOption @relation(fields: [answerOptionId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, questionId])
+  @@index([questionId])
+}
+
+/// The graded outcome for a question. Not visible to players and does not
+/// feed scoring until `approvedAt` is set (see METHODS.md's "go live" gate).
+/// `noneMatched = true` triggers the "no answer was correct" 1-point fallback.
+model Result {
+  id                    String        @id @default(cuid())
+  questionId            String        @unique
+  question              Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  correctAnswerOptionId String?
+  correctAnswerOption   AnswerOption? @relation("CorrectOption", fields: [correctAnswerOptionId], references: [id])
+  noneMatched           Boolean       @default(false)
+  status                ResultStatus  @default(PENDING)
+  rawScrapedData        Json?
+  approvedAt            DateTime?
+  approvedByUserId      String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}

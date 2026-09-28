@@ -9,24 +9,24 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 ## Phase 0 — Scaffolding
 *No dependencies. Can start immediately.*
 
-- [ ] **0.1** Init Next.js 14 (App Router, TypeScript) project; add Tailwind CSS + shadcn/ui; add Prisma; add ESLint/Prettier.
-  **Verify:** `npm run dev` serves a blank page at `/` with no console errors; `npm run build` succeeds.
-- [ ] **0.2** Add Railway project with a Postgres plugin attached to the app service; wire `DATABASE_URL`.
-  **Verify:** `prisma db pull` (or a trivial `SELECT 1`) succeeds against the Railway Postgres instance from a local shell using the Railway-provided connection string.
-- [ ] **0.3** Add Resend API key as an env var; send one test email via a throwaway script.
+- [x] **0.1** Init Next.js (App Router, TypeScript) project — actually Next.js 16.3.6/React 19.2.8, the current stable at build time, not 14; add Tailwind CSS v4; add Prisma 7.10.0; add ESLint + Prettier.
+  **Verify:** `npm run dev` serves a blank page at `/` with no console errors (confirmed — `200` from a local curl); `npm run build` succeeds (confirmed, static prerender of `/`). shadcn/ui init deferred to Phase 7 when there's an actual UI to skin.
+- [ ] **0.2** Add Railway project with a Postgres plugin attached to the app service; wire `DATABASE_URL`. **Blocked on Railway credentials from the user.**
+  **Verify:** `prisma db pull` (or a trivial `SELECT 1`) succeeds against the Railway Postgres instance from a local shell using the Railway-provided connection string. (A local Homebrew Postgres 14 scratch DB, `nobel_quiz_dev`, stands in for this until Railway is wired up — see METHODS.md.)
+- [ ] **0.3** Add Resend API key as an env var; send one test email via a throwaway script. **Blocked on a Resend API key from the user.**
   **Verify:** a test email arrives in an inbox you control, sent through the Resend API using the project's env var.
-- [ ] **0.4** Set up `instrumentation.ts` scaffold with a no-op interval (proves the "always-on process" assumption holds on Railway before real scraping logic is built on top of it).
-  **Verify:** deploy to Railway, confirm via logs that the interval fires repeatedly over a 10+ minute window without the process restarting or sleeping.
+- [x] **0.4** Set up `instrumentation.ts` scaffold with a no-op interval (proves the "always-on process" assumption holds on Railway before real scraping logic is built on top of it).
+  **Verify:** locally confirmed `register()` runs once at `next dev` startup with no errors (log line observed, process stayed up, `/` kept responding). The full "10+ minutes on Railway without restarting" check is inherently a Railway-only check — re-verify once 9.1 deploys.
 
 ---
 
 ## Phase 1 — Data model
 **Depends on:** 0.1
 
-- [ ] **1.1** Write the Prisma schema: `User`, `Session`, `VerificationToken`, `Prize` (the 6 categories + a virtual "week" scope), `Question`, `AnswerOption` (with `probability`/`points` precomputed), `Submission` (user's picked option per question, editable until deadline), `Result` (admin-confirmed or scraped outcome per question), `DailyScore`/`TotalScore` (or compute on read — decide at implementation time).
-  **Verify:** `prisma migrate dev` runs clean; a seed script can create one user, one prize, one question, one answer option, and one submission without constraint errors.
-- [ ] **1.2** Write the odds/points calculator as a small pure function taking a historical frequency (e.g. `4/20`) and returning `points = 1 / probability`, matching the worked example in instructions.md (4/20 → 5 points).
-  **Verify:** unit test: `points(4, 20) === 5`; `points(0, 20)` throws or is handled explicitly (never awarded historically → must not divide by zero) — decide and document the guard in this file's Phase 1 notes once hit.
+- [x] **1.1** Write the Prisma schema: `User`, `Session`, `VerificationToken`, `PrizeCategory` (the 6 categories), `Question` (with a `scope` of `PRIZE_SPECIFIC` or `WHOLE_WEEK` and its own `answerDeadline`), `AnswerOption` (historical count/total + precomputed `points`), `Submission` (unique per user+question, editable until deadline), `Result` (gated by `approvedAt`, with a `noneMatched` flag for the 2.6 fallback). Scores are computed on read (no `DailyScore`/`TotalScore` tables) per METHODS.md.
+  **Verify:** `prisma migrate dev` ran clean (`20260928084411_init` applied to a local scratch DB). A throwaway smoke script created one row per model end-to-end, confirmed the `(userId, questionId)` unique constraint, and confirmed cascade-delete on `User` leaves zero orphaned `Submission` rows (also validates the 8.2 hard-delete decision structurally).
+- [x] **1.2** Write the odds/points calculator as a small pure function taking a historical frequency (e.g. `4/20`) and returning `points = 1 / probability`, matching the worked example in instructions.md (4/20 → 5 points).
+  **Verify:** `src/lib/scoring.ts` + `src/lib/scoring.test.ts`, `npm test` passing: `computePoints(4, 20) === 5`; `computePoints(0, 20)` and `computePoints(4, 0)` both throw explicitly rather than dividing by zero; `computePoints(21, 20)` throws for an impossible count-exceeds-total case.
 
 ---
 
