@@ -33,14 +33,14 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 ## Phase 2 — Question content authoring
 **Depends on:** 1.1 (schema shape only, not a running DB — can be written as seed data in parallel with Phase 0/3/4)
 
-- [ ] **2.1** Author Physics, Chemistry, Medicine questions (2–3 each: laureate count, a citation-phrase pick, an affiliation pick) with options + odds derived from the historical tables in `nobeldata.md`.
-  **Verify:** for each question, the sum of all listed historical outcome-frequencies for that question equals 20 (all 20 years accounted for, e.g. Physics laureate-count: 0 + 7 + 13 = 20).
-- [ ] **2.2** Author Economics questions (laureate count skews flatter: 6/6/8 solo/two/three-way) and Literature questions ("prose, poetry or other" + a citizenship/other pick).
-  **Verify:** same frequency-sums-to-20 check; Literature's genre split (15/2/3) matches `nobeldata.md`'s Tab 5 summary.
-- [ ] **2.3** Author Peace questions (organisation-vs-individual is a real historical split unique to this prize; a citizenship/geography pick).
-  **Verify:** frequency-sums-to-20 check against Tab 6.
-- [ ] **2.4** Author whole-week questions ("How many female laureates total?", "Average age over 72?", "Any laureate resident in Africa?", "How many American citizens?") using the "Answers for the betting questions" section of `nobeldata.md` for odds, each sharing the Physics announcement's deadline.
-  **Verify:** every whole-week question's `answerDeadline` equals the Physics question's `answerDeadline` exactly (same timestamp, not just same day).
+- [x] **2.1** Author Physics, Chemistry, Medicine questions (2 each: laureate count + a citation-phrase pick) with options + odds derived from the historical tables in `nobeldata.md`. Implemented in `prisma/seed.ts`.
+  **Verify:** for each question, the sum of all listed historical outcome-frequencies for that question equals 20 — confirmed by inspection of the seeded rows (Physics 7+13, Chemistry 3+3+14, Medicine 3+6+11, and both prizes' phrase-pick questions).
+- [x] **2.2** Author Economics questions (laureate count 6/6/8 solo/two/three-way + an MIT-affiliation pick) and Literature questions ("prose, poetry or other" + a US-citizenship pick).
+  **Verify:** same frequency-sums-to-20 check (confirmed); Literature's genre split (15/2/3) matches `nobeldata.md`'s Tab 5 summary (confirmed).
+- [x] **2.3** Author Peace questions (individual-only/organisation-only/mixed — computed from Tab 6's year-by-year list, since `nobeldata.md` doesn't state this split directly: 11/6/3 — plus a US-citizenship pick).
+  **Verify:** frequency-sums-to-20 check against Tab 6 (confirmed: 11+6+3=20, matching the underlying laureate list).
+- [x] **2.4** Author whole-week questions using odds either quoted directly from `nobeldata.md`'s "Answers for the betting questions" section (female-laureate-count buckets) or computed from its raw per-laureate tables where no ready-made frequency existed (average age >72, Africa residency, US-citizen-count buckets — all three verified with a throwaway Node script cross-tabulating every laureate row, not hand-arithmetic; see METHODS.md).
+  **Verify:** every whole-week question's `answerDeadline` equals the Physics question's `answerDeadline` exactly — confirmed programmatically (all four whole-week rows show `2026-10-06T09:45:00.000Z`, identical to the Physics question's timestamp).
 - [x] **2.5** Set the 2026 announcement dates — confirmed 2026-09-28: Medicine Mon 5 Oct, Physics Tue 6 Oct, Chemistry Wed 7 Oct, Literature Thu 8 Oct, Peace Fri 9 Oct, Economics Mon 12 Oct — as Stockholm-time constants, stored/converted to UTC per METHODS.md.
   **Verify:** a UTC-converted timestamp for each date, spot-checked against timeanddate.com for CET/CEST offset correctness on that specific date.
 - [x] **2.6** Fallback rule confirmed 2026-09-28: if none of a question's answer options match the actual outcome, every user is awarded 1 point for that question, and the UI displays the exact copy **"No answer was correct, every user gets 1 point"**.
