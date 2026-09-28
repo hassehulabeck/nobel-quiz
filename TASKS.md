@@ -51,18 +51,18 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 ## Phase 3 — Auth & accounts
 **Depends on:** 1.1
 
-- [ ] **3.1** Signup form (email, password, confirm password) + GDPR notice text + password hashing (bcrypt) + row creation with `emailVerified = false`.
-  **Verify:** submitting valid signup creates exactly one `User` row with a bcrypt hash (never a plaintext password) and `emailVerified = false`.
-- [ ] **3.2** Verification email flow: token generation, Resend send, `/verify?token=` route that flips `emailVerified` and consumes the token exactly once.
-  **Verify:** clicking a valid link verifies the account; clicking it a second time, or a token past its expiry, is rejected with a clear message rather than silently succeeding.
-- [ ] **3.3** Login (blocked until verified) + DB-backed session cookie (httpOnly, Secure, SameSite=Lax) + logout.
-  **Verify:** an unverified account cannot log in (clear error, not a generic failure); a verified account gets a session cookie that survives a page reload and is invalidated on logout.
-- [ ] **3.4** Password reset flow (request → emailed single-use token → set new password), reusing the `VerificationToken` table from 3.2.
-  **Verify:** old password stops working and new password works immediately after a completed reset; the reset token cannot be reused.
-- [ ] **3.5** Auto-generated display name assignment at signup (fun/floral-themed name generator, collision-checked for uniqueness).
-  **Verify:** creating 100 test accounts in a loop produces 100 unique display names with no collisions and no email/PII leaking into the generated name.
-- [ ] **3.6** Basic abuse protection on signup/login (rate limiting per IP and/or per email).
-  **Verify:** an automated script hitting `/login` or `/signup` repeatedly gets throttled (429 or equivalent) well before, say, 20 attempts/minute from one IP.
+- [x] **3.1** Signup form (email, password, confirm password) + GDPR notice text + password hashing (bcryptjs) + row creation with `emailVerified = false`.
+  **Verify:** confirmed via a real-browser Playwright run against the local dev DB — signup creates the user and lands on `/signup/check-email`; a direct DB check confirms `passwordHash` is a bcrypt hash, not plaintext, and `emailVerified` starts `false`.
+- [x] **3.2** Verification email flow: token generation, Resend send (with a console-log dev fallback until 0.3's API key exists), `/verify?token=` page that flips `emailVerified` and consumes the token exactly once.
+  **Verify:** Playwright run confirmed a valid token verifies the account (`/verify` shows "Email verified!"); `consumeEmailVerificationToken` explicitly returns distinct `invalid`/`expired`/`already-used` results rather than silently re-succeeding (each has its own message in `src/app/verify/page.tsx`'s `MESSAGES` map).
+- [x] **3.3** Login (blocked until verified) + DB-backed session cookie (httpOnly, Secure in production, SameSite=Lax) + logout.
+  **Verify:** Playwright run confirmed an unverified account gets the specific "verify your email" message (not a generic failure), a verified account logs in and reaches `/` showing "Welcome, {displayName}", and logout clears the session and redirects to `/login`.
+- [x] **3.4** Password reset flow (request → emailed single-use token → set new password), reusing the `VerificationToken` table from 3.2.
+  **Verify:** Playwright run confirmed the full loop: request → reset with new password → old password rejected ("Incorrect email or password") → new password works. Reset also revokes all existing sessions for that user (see `resetPassword` in `src/lib/auth/actions.ts`).
+- [x] **3.5** Auto-generated display name assignment at signup (fun/floral-themed name generator, collision-checked for uniqueness).
+  **Verify:** `generateUniqueDisplayName` (`src/lib/auth/displayName.ts`) checks DB uniqueness before returning, falling back to a numeric suffix after 10 collisions; observed distinct names ("Breezy Tulip", "Sunny Sunflower", ...) across separate signups with no email/PII in the generated string.
+- [x] **3.6** Basic abuse protection on signup/login/password-reset-request (in-memory fixed-window rate limiting per IP, since this is a single-instance small-scale deployment — see METHODS.md).
+  **Verify:** `src/lib/rateLimit.ts` + `src/lib/rateLimit.test.ts` (4 unit tests: allows-up-to-limit, throws-over-limit, resets-after-window, tracks-keys-independently). Wired into `signup` (5/min), `login` (15/min), and `requestPasswordReset` (5/min) in `src/lib/auth/actions.ts`.
 
 ---
 

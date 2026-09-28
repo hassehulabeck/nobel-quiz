@@ -49,8 +49,12 @@ model User {
   submissions        Submission[]
 }
 
+/// `token` (not `id`) is what's stored in the session cookie — a
+/// dedicated high-entropy random value, generated with crypto.randomBytes
+/// rather than relying on the primary key's cuid for guess-resistance.
 model Session {
   id        String   @id @default(cuid())
+  token     String   @unique
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
