@@ -125,8 +125,8 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 
 - [ ] **8.1** Draft plain-language GDPR notice: what's stored (email, hashed password, answers, points), why (login, verification, result notification, leaderboard), retention, and how to request deletion.
   **Verify:** notice is shown on the signup page before account creation, and linked from the logged-in page footer.
-- [ ] **8.2** Account/data deletion path (self-service or admin-assisted — confirm which with the user before building).
-  **Verify:** deleting a test account removes/anonymizes their email and personal data while preserving aggregate leaderboard integrity for other users (decide and document whether deleted users' historical answers are removed or anonymized in place).
+- [ ] **8.2** Account/data deletion path: deleting an account removes the user row *and* all of their historical answers/submissions/scores outright (confirmed 2026-09-28 — no anonymized retention). Self-service vs. admin-assisted delivery still to be decided when this phase starts.
+  **Verify:** deleting a test account leaves zero rows referencing that user (`User`, `Session`, `Submission`, score rows all gone via cascade or explicit delete), and the leaderboard/top-ten recomputes correctly for remaining users with no orphaned rows or broken foreign keys.
 
 ---
 
@@ -153,8 +153,9 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 ---
 
 ## Open items requiring a decision before the relevant phase starts
-- **8.2**: whether account deletion removes or anonymizes historical answers — need a quick confirmation from the user when Phase 8 is reached, not blocking earlier work.
+- None currently outstanding.
 
 ## Resolved items
 - **2.5** (2026-09-28): 2026 dates confirmed as Medicine 5 Oct, Physics 6 Oct, Chemistry 7 Oct, Literature 8 Oct, Peace 9 Oct, Economics 12 Oct.
 - **2.6** (2026-09-28): fallback copy confirmed as "No answer was correct, every user gets 1 point".
+- **8.2** (2026-09-28): account deletion removes historical answers outright rather than anonymizing them in place.

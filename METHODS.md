@@ -56,7 +56,7 @@ Per `CLAUDE.md`, before selecting an architecture, `instructions.md` and `nobeld
 
 **Accessibility & design:** warm/floral palette (marigold, coral, sage, lavender) checked against WCAG AA contrast; shadcn/ui (Radix primitives) for interactive components (accordions, tabs, dialogs) to get keyboard nav and ARIA semantics for free; a playful display font for headings paired with a highly legible body font; no information conveyed by color alone (icons/text accompany every status indicator).
 
-**GDPR:** a short, plain-language notice at signup explaining that the email address is stored solely for login and result notification, is never shown to other users, and can be deleted on request; a data-deletion path is included as a task.
+**GDPR:** a short, plain-language notice at signup explaining that the email address is stored solely for login and result notification, is never shown to other users, and can be deleted on request. Confirmed 2026-09-28: deletion removes the account **and** its historical answers/submissions/scores outright — no anonymized retention of past answers.
 
 ---
 
