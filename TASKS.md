@@ -163,6 +163,9 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 - [x] **9b.3** Quiz page lists questions chronologically by announcement day (Medicine first, Stockholm calendar days), a thin divider between days and a heavier divider before the whole-week questions; replaces the open/awaiting/graded sections (status is shown on each card).
   **Verify:** `scripts/verify-account-and-order.ts` — day headings in order, whole-week last, computed border widths 1px between days and 4px before whole-week; `formatStockholmDay` unit tests.
 
+- [x] **9b.4** Collapsible "How the game works" panel at the top of the logged-in page (odds base, points formula with the worked example, deadlines, results/admin approval, 1-point fallback, leaderboard privacy, the finish); the player's hide/show choice is remembered.
+  **Verify:** `scripts/verify-rules-panel.ts` (9/9) — panel above the leaderboard, open on first visit, worked example equals `computePoints(4, 20)`, hides on click, stays hidden after reload, re-opens with Enter and stays open.
+
 ---
 
 ## Open items requiring a decision before the relevant phase starts

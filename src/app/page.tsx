@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { logout } from "@/lib/auth/actions";
@@ -7,6 +8,9 @@ import { Leaderboard } from "@/components/quiz/Leaderboard";
 import { FullLeaderboard } from "@/components/quiz/FullLeaderboard";
 import { PlayerName } from "@/components/quiz/PlayerName";
 import { QuestionsByDay } from "@/components/quiz/QuestionsByDay";
+import { RulesContent } from "@/components/quiz/RulesContent";
+import { RulesPanel } from "@/components/quiz/RulesPanel";
+import { RULES_HIDDEN_COOKIE } from "@/lib/quiz/rulesCookie";
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -75,10 +79,12 @@ export default async function Home() {
     );
   }
 
-  const [questions, leaderboard] = await Promise.all([
+  const [questions, leaderboard, cookieStore] = await Promise.all([
     getQuizPageData(user.id),
     computeLeaderboard(),
+    cookies(),
   ]);
+  const rulesOpen = cookieStore.get(RULES_HIDDEN_COOKIE)?.value !== "1";
 
   return (
     <main
@@ -107,6 +113,10 @@ export default async function Home() {
           </form>
         </div>
       </header>
+
+      <RulesPanel defaultOpen={rulesOpen}>
+        <RulesContent />
+      </RulesPanel>
 
       <Leaderboard entries={leaderboard} currentUserId={user.id} />
 
