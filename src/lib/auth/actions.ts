@@ -1,11 +1,13 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/email";
 import { enforceRateLimit, RateLimitError } from "@/lib/rateLimit";
 import { generateUniqueDisplayName } from "./displayName";
+import { checkCustomDisplayName } from "./displayNameRules";
 import { hashPassword, verifyPassword } from "./password";
 import { createSession, destroySession, getCurrentUser } from "./session";
 import { generateToken } from "./tokens";
@@ -282,4 +284,57 @@ export async function confirmEmail(formData: FormData) {
       ? await consumeEmailVerificationToken(token)
       : "invalid";
   redirect(`/verify?result=${result}`);
+}
+
+// Lets a logged-in user pick their own display name, or swap to a fresh random
+// laureate. Uniqueness is checked case-insensitively up front, with the DB's
+// unique constraint (P2002) as the backstop for two people racing for a name.
+export async function updateDisplayName(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const user = await getCurrentUser();
+  if (!user) return { error: "You must be logged in to change your name." };
+
+  try {
+    await enforceRateLimit("rename", 10);
+  } catch (err) {
+    if (err instanceof RateLimitError) return { error: err.message };
+    throw err;
+  }
+
+  let name: string;
+  if (formData.get("intent") === "random") {
+    name = await generateUniqueDisplayName();
+  } else {
+    const check = checkCustomDisplayName(
+      String(formData.get("displayName") ?? "")
+    );
+    if ("error" in check) return { error: check.error };
+    name = check.name;
+  }
+
+  const clash = await prisma.user.findFirst({
+    where: {
+      displayName: { equals: name, mode: "insensitive" },
+      NOT: { id: user.id },
+    },
+    select: { id: true },
+  });
+  if (clash) return { error: "That name is already taken" };
+
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { displayName: name },
+    });
+  } catch (err) {
+    if ((err as { code?: string }).code === "P2002") {
+      return { error: "That name is already taken" };
+    }
+    throw err;
+  }
+
+  revalidatePath("/");
+  return { success: true };
 }

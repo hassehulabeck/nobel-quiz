@@ -14,6 +14,8 @@ export type QuestionView = {
   text: string;
   scope: "PRIZE_SPECIFIC" | "WHOLE_WEEK";
   prizeName: string | null;
+  /** The prize's announcement time; null for whole-week questions. */
+  announcementAt: Date | null;
   answerDeadline: Date;
   options: QuestionOptionView[];
   userAnswerOptionId: string | null;
@@ -32,7 +34,16 @@ export async function getQuizPageData(
       options: { orderBy: { sortOrder: "asc" } },
       result: { include: { correctAnswerOption: true } },
     },
-    orderBy: [{ scope: "asc" }, { sortOrder: "asc" }],
+    orderBy: [{ sortOrder: "asc" }],
+  });
+
+  // Chronological: prize questions in announcement order (so Medicine, the
+  // first announcement, leads), then the whole-week questions. `sortOrder`
+  // keeps the authored order within a prize.
+  questions.sort((a, b) => {
+    const aTime = a.prize?.announcementAt.getTime() ?? Infinity;
+    const bTime = b.prize?.announcementAt.getTime() ?? Infinity;
+    return aTime - bTime || a.sortOrder - b.sortOrder;
   });
 
   const submissionByQuestionId = new Map<string, { answerOptionId: string }>();
@@ -75,6 +86,7 @@ export async function getQuizPageData(
       text: question.text,
       scope: question.scope,
       prizeName: question.prize?.name ?? null,
+      announcementAt: question.prize?.announcementAt ?? null,
       answerDeadline: question.answerDeadline,
       options: question.options.map((o) => ({
         id: o.id,

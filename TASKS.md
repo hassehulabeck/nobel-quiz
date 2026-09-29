@@ -154,6 +154,17 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 
 ---
 
+## Phase 9b — Post-deploy refinements (requested 2026-09-29)
+
+- [x] **9b.1** Email verification link must survive mail scanners: `/verify` GET is read-only, a "Confirm my email" button POSTs the consuming action.
+  **Verify:** `scripts/verify-email-link-prefetch.ts` — bare GETs leave token/account untouched; confirming verifies; reuse reports already-used (7/7).
+- [x] **9b.2** Default display names are former laureates (deceased only) with a short blurb ("Physics 1921") shown next to the name; users can choose their own name or re-roll a random laureate on `/account`.
+  **Verify:** `scripts/verify-laureate-names.ts` checks all 68 entries against the official Nobel API (year, category, complete award list, deceased); `src/lib/auth/displayNameRules.test.ts` covers the rules; `scripts/verify-account-and-order.ts` drives the real UI (laureate default + blurb, custom name, case-insensitive clash, laureate-name and bad-character rejection, random re-roll).
+- [x] **9b.3** Quiz page lists questions chronologically by announcement day (Medicine first, Stockholm calendar days), a thin divider between days and a heavier divider before the whole-week questions; replaces the open/awaiting/graded sections (status is shown on each card).
+  **Verify:** `scripts/verify-account-and-order.ts` — day headings in order, whole-week last, computed border widths 1px between days and 4px before whole-week; `formatStockholmDay` unit tests.
+
+---
+
 ## Open items requiring a decision before the relevant phase starts
 - None currently outstanding.
 

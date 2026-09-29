@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSameStockholmDay } from "./timezone";
+import { formatStockholmDay, isSameStockholmDay } from "./timezone";
 
 describe("isSameStockholmDay", () => {
   it("treats two timestamps on the same UTC calendar day as the same day", () => {
@@ -35,5 +35,19 @@ describe("isSameStockholmDay", () => {
         new Date("2026-10-06T10:00:00Z")
       )
     ).toBe(false);
+  });
+});
+
+describe("formatStockholmDay", () => {
+  it("labels an announcement by its Stockholm calendar day", () => {
+    expect(formatStockholmDay(new Date("2026-10-05T09:30:00Z"))).toBe(
+      "Monday 5 October"
+    );
+  });
+  it("rolls over at Stockholm midnight, not UTC midnight", () => {
+    // 23:30 UTC on 5 Oct is 01:30 on 6 Oct in Stockholm (CEST, UTC+2).
+    expect(formatStockholmDay(new Date("2026-10-05T23:30:00Z"))).toBe(
+      "Tuesday 6 October"
+    );
   });
 });

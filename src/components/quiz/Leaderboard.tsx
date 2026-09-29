@@ -1,4 +1,5 @@
 import type { LeaderboardEntry } from "@/lib/quiz/leaderboard";
+import { PlayerName } from "./PlayerName";
 
 export function Leaderboard({
   entries,
@@ -51,8 +52,10 @@ export function Leaderboard({
             >
               <td>{entry.rank}</td>
               <th scope="row" className="text-left">
-                {entry.displayName}
-                {entry.userId === currentUserId ? " (you)" : ""}
+                <PlayerName
+                  name={entry.displayName}
+                  suffix={entry.userId === currentUserId ? " (you)" : ""}
+                />
               </th>
               <td className="text-right">{entry.todayPoints}</td>
               <td className="text-right">{entry.totalPoints}</td>
@@ -68,7 +71,10 @@ export function Leaderboard({
               <tr className="font-medium">
                 <td>{currentUserEntry.rank}</td>
                 <th scope="row" className="text-left font-medium">
-                  {currentUserEntry.displayName} (you)
+                  <PlayerName
+                    name={currentUserEntry.displayName}
+                    suffix=" (you)"
+                  />
                 </th>
                 <td className="text-right">{currentUserEntry.todayPoints}</td>
                 <td className="text-right">{currentUserEntry.totalPoints}</td>
