@@ -9,6 +9,7 @@ import { generateUniqueDisplayName } from "./displayName";
 import { hashPassword, verifyPassword } from "./password";
 import { createSession, destroySession, getCurrentUser } from "./session";
 import { generateToken } from "./tokens";
+import { consumeEmailVerificationToken } from "./verifyEmail";
 
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -269,4 +270,16 @@ export async function deleteAccount(
   await prisma.user.delete({ where: { id: user.id } });
   await destroySession();
   redirect("/login?deleted=1");
+}
+
+// Consumes the emailed verification token. Triggered by the button on `/verify`
+// rather than by loading the page, so link scanners that only GET the URL
+// can't use up the single-use token before the user clicks.
+export async function confirmEmail(formData: FormData) {
+  const token = formData.get("token");
+  const result =
+    typeof token === "string" && token
+      ? await consumeEmailVerificationToken(token)
+      : "invalid";
+  redirect(`/verify?result=${result}`);
 }

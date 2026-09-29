@@ -48,6 +48,8 @@ async function main() {
   await page.waitForURL(`${BASE}/signup/check-email`);
   const verifyToken = await latestVerificationToken(email);
   await page.goto(`${BASE}/verify?token=${verifyToken}`);
+  await page.click('button:has-text("Confirm my email")');
+  await page.waitForURL(/\/verify\?result=/);
   await page.goto(`${BASE}/login`);
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);

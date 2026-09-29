@@ -27,6 +27,8 @@ async function signupAndVerify(page: import("playwright").Page, email: string, p
 
   const verifyToken = await latestVerificationToken(email);
   await page.goto(`${BASE}/verify?token=${verifyToken}`);
+  await page.click('button:has-text("Confirm my email")');
+  await page.waitForURL(/\/verify\?result=/);
 }
 
 async function login(page: import("playwright").Page, email: string, password: string) {

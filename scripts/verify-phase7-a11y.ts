@@ -145,6 +145,8 @@ async function main() {
 
     const verifyToken = await latestVerificationToken(email);
     await page.goto(`${BASE}/verify?token=${verifyToken}`);
+    await page.click('button:has-text("Confirm my email")');
+    await page.waitForURL(/\/verify\?result=/);
     await runAxe(page, "verify success");
 
     await page.goto(`${BASE}/login`);
