@@ -135,11 +135,11 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 ## Phase 9 — Deployment
 **Depends on:** enough of Phases 0–6 to have something worth deploying; can start a skeleton deploy as early as Phase 0.
 
-- [ ] **9.1** Railway deploy pipeline: build command runs `prisma migrate deploy`, start command runs `next start`; env vars for `DATABASE_URL`, `RESEND_API_KEY`, session secret.
+- [x] **9.1** Railway deploy pipeline: build command runs `prisma migrate deploy`, start command runs `next start`; env vars for `DATABASE_URL`, `RESEND_API_KEY`, session secret. Done 2026-09-29: `web` service deploys from GitHub `main` at https://web-production-e4497.up.railway.app; `npx prisma migrate deploy` is the service's pre-deploy command (`railway.json` is ignored by Railway, so it was removed); no session secret needed (DB-backed sessions). Production seeded once by the user from a terminal (6 categories, 16 questions, 40 options) — see METHODS.md.
   **Verify:** a fresh push to the deploy branch results in a live, reachable `*.up.railway.app` URL with a working DB connection, with no manual steps run by hand on the server.
 - [ ] **9.2** (When ready) point a one.com domain's DNS at the Railway service.
   **Verify:** the custom domain resolves to the app over HTTPS with a valid certificate.
-- [ ] **9.3** Basic uptime/error visibility (Railway's built-in logs/metrics is sufficient at this scale — confirm no extra paid tool is needed).
+- [x] **9.3** Basic uptime/error visibility (Railway's built-in logs/metrics is sufficient at this scale — confirm no extra paid tool is needed). Confirmed 2026-09-29: a deliberate bad request (bogus Server Action POST + unknown path) showed up in Railway's HTTP log within a second; app-side exceptions (e.g. the scheduler's failed ticks) appear in the deploy log with stack traces. No extra tool needed.
   **Verify:** deliberately trigger a server error (e.g. a bad request) and confirm it's visible in Railway's log stream within a minute.
 
 ---
