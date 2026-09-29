@@ -58,11 +58,19 @@ export default async function Home() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-16 text-center outline-none"
+        className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-4 py-16 text-center outline-none"
       >
         <h1 className="text-3xl font-semibold">Nobel Quiz</h1>
+        <p className="text-lg">
+          Guess how Nobel prize week 2026 will turn out. Each prize day has a
+          couple of questions about that prize, and there are a few whole-week
+          questions too. Pick one answer per question.
+        </p>
         <p className="text-muted-foreground">
-          Guess this year&apos;s Nobel prize outcomes.
+          Bold guesses pay best: the rarer the outcome, the more points you
+          bank. Every point lands on the live leaderboard, so think you know
+          your Nobels better than your friends and colleagues? Prove it, and
+          claim the top spot.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/login" className="btn-primary">
