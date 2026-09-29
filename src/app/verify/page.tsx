@@ -36,10 +36,14 @@ export default async function VerifyPage({
   const { heading, body } = MESSAGES[result];
 
   return (
-    <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center gap-4 px-4 py-16">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto flex max-w-sm flex-1 flex-col justify-center gap-4 px-4 py-16 outline-none"
+    >
       <h1 className="text-2xl font-semibold">{heading}</h1>
       <p>{body}</p>
-      <Link href="/login" className="underline">
+      <Link href="/login" className="text-primary-hover underline underline-offset-2">
         Go to login
       </Link>
     </main>

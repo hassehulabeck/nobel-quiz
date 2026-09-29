@@ -48,3 +48,4 @@ next-env.d.ts
 # keep only the .agents/ copy (referenced from CLAUDE.md) committed.
 .claude/skills/
 .windsurf/skills/
+.claude/scheduled_tasks.lock

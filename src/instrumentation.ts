@@ -1,19 +1,25 @@
 /**
  * Runs once when the Next.js server process starts (see METHODS.md's
- * "in-process scheduler" decision). This is currently a no-op heartbeat that
- * proves the interval survives on Railway's always-on process; Phase 6 will
- * replace the interval body with the real per-prize scrape/retry logic.
+ * "in-process scheduler" decision). Phase 0.4 proved a no-op heartbeat
+ * survives on Railway's always-on process; this now ticks the real Phase 6
+ * scrape/grade scheduler every minute. The tick interval is deliberately
+ * more frequent than the actual per-question retry interval
+ * (`RETRY_INTERVAL_MS` in scheduler.ts) — the tick just checks what's due,
+ * `shouldAttempt` does the real throttling.
  */
-export function register() {
+export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") {
     return;
   }
 
-  const INTERVAL_MS = 60_000;
+  const { runSchedulerTick } = await import("@/lib/scraping/scheduler");
+  const TICK_INTERVAL_MS = 60_000;
 
   setInterval(() => {
-    console.log(`[scheduler] heartbeat at ${new Date().toISOString()}`);
-  }, INTERVAL_MS).unref();
+    runSchedulerTick().catch((err) => {
+      console.error("[scheduler] tick failed:", err);
+    });
+  }, TICK_INTERVAL_MS).unref();
 
-  console.log("[scheduler] registered heartbeat interval at server startup");
+  console.log("[scheduler] registered Nobel result scheduler at server startup");
 }

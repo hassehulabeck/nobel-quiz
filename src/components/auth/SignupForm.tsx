@@ -19,7 +19,7 @@ export function SignupForm() {
           name="email"
           required
           autoComplete="email"
-          className="border rounded px-3 py-2"
+          className="field-input"
         />
       </label>
       <label className="flex flex-col gap-1">
@@ -30,8 +30,12 @@ export function SignupForm() {
           required
           minLength={8}
           autoComplete="new-password"
-          className="border rounded px-3 py-2"
+          aria-describedby="password-hint"
+          className="field-input"
         />
+        <span id="password-hint" className="text-xs text-muted-foreground">
+          At least 8 characters.
+        </span>
       </label>
       <label className="flex flex-col gap-1">
         <span>Confirm password</span>
@@ -41,15 +45,11 @@ export function SignupForm() {
           required
           minLength={8}
           autoComplete="new-password"
-          className="border rounded px-3 py-2"
+          className="field-input"
         />
       </label>
       <FormError state={state} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn-primary">
         {pending ? "Creating account..." : "Sign up"}
       </button>
     </form>

@@ -99,6 +99,11 @@ model Question {
   text           String
   answerDeadline DateTime
   sortOrder      Int            @default(0)
+  /// Which computed signal (see src/lib/scraping/grader.ts) this question is
+  /// auto-graded on, e.g. "LAUREATE_COUNT", "AFFILIATION_MIT". Null means no
+  /// reliable auto-signal exists (citizenship, Literature genre) and grading
+  /// is always admin-entered — see METHODS.md's Phase 6 entry.
+  gradingKey String?
 
   options     AnswerOption[]
   submissions Submission[]
@@ -119,6 +124,10 @@ model AnswerOption {
   historicalTotal Int
   points          Decimal  @db.Decimal(6, 3)
   sortOrder       Int      @default(0)
+  /// Canonical machine-comparable value for the question's `gradingKey`
+  /// (e.g. "2", "yes", "individual") — kept separate from the free-text
+  /// `label` so player-facing copy can change without touching grading.
+  matchValue String?
 
   submissions      Submission[]
   resultsAsCorrect Result[]     @relation("CorrectOption")
@@ -155,6 +164,11 @@ model Result {
   noneMatched           Boolean       @default(false)
   status                ResultStatus  @default(PENDING)
   rawScrapedData        Json?
+  /// Scheduler retry bookkeeping (see METHODS.md's Phase 6 entry) — no
+  /// separate "FAILED" status; a row stuck at the attempt cap is treated
+  /// the same as any other "needs admin attention" case.
+  scrapeAttempts        Int           @default(0)
+  lastAttemptAt         DateTime?
   approvedAt            DateTime?
   approvedByUserId      String?
   createdAt             DateTime      @default(now())

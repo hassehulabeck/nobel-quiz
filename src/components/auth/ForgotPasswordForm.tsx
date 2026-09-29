@@ -12,7 +12,7 @@ export function ForgotPasswordForm() {
 
   if (state && "success" in state) {
     return (
-      <p>
+      <p role="status" className="rounded-md bg-accent-tint px-3 py-2 text-accent-tint-foreground">
         If an account exists for that email address, a password reset link has
         been sent. Check your inbox.
       </p>
@@ -28,15 +28,11 @@ export function ForgotPasswordForm() {
           name="email"
           required
           autoComplete="email"
-          className="border rounded px-3 py-2"
+          className="field-input"
         />
       </label>
       <FormError state={state} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn-primary">
         {pending ? "Sending..." : "Send reset link"}
       </button>
     </form>

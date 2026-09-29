@@ -35,3 +35,30 @@ export function roundPoints(points: number): number {
 export const NO_ANSWER_MATCHED_MESSAGE =
   "No answer was correct, every user gets 1 point";
 export const NO_ANSWER_MATCHED_POINTS = 1;
+
+export type ResultForScoring = {
+  approvedAt: Date | null;
+  noneMatched: boolean;
+  correctAnswerOptionId: string | null;
+};
+
+export type SubmissionForScoring = { answerOptionId: string } | null;
+
+/**
+ * Points a single user earned on a single question, or `null` if the
+ * question hasn't been graded (approved) yet — distinct from 0, which
+ * means "graded, but this user didn't win it."
+ */
+export function computeSubmissionPoints(
+  result: ResultForScoring,
+  submission: SubmissionForScoring,
+  correctOptionPoints: number | null
+): number | null {
+  if (!result.approvedAt) return null;
+  if (!submission) return 0;
+  if (result.noneMatched) return NO_ANSWER_MATCHED_POINTS;
+  if (submission.answerOptionId === result.correctAnswerOptionId) {
+    return correctOptionPoints ?? 0;
+  }
+  return 0;
+}

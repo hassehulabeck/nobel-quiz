@@ -19,7 +19,7 @@ export function LoginForm() {
           name="email"
           required
           autoComplete="email"
-          className="border rounded px-3 py-2"
+          className="field-input"
         />
       </label>
       <label className="flex flex-col gap-1">
@@ -29,15 +29,11 @@ export function LoginForm() {
           name="password"
           required
           autoComplete="current-password"
-          className="border rounded px-3 py-2"
+          className="field-input"
         />
       </label>
       <FormError state={state} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn-primary">
         {pending ? "Logging in..." : "Log in"}
       </button>
     </form>

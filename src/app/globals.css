@@ -1,26 +1,127 @@
 @import "tailwindcss";
 
+/*
+ * Warm/floral palette (marigold, coral, sage, lavender) per METHODS.md's
+ * architecture decision. Every pair below was checked with a WCAG contrast
+ * formula in scripts/verify-phase7-contrast.ts (which reads these exact
+ * values from this file) rather than picked by eye.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #fbf3e7;
+  --color-surface: #ffffff;
+  --color-foreground: #3a2a1e;
+  --color-muted-foreground: #6b5a4c;
+  --color-border: #9c8060;
+
+  --color-primary: #a6620a;
+  --color-primary-hover: #8a4f08;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #b8452a;
+  --color-secondary-hover: #9a3a22;
+  --color-secondary-foreground: #ffffff;
+
+  --color-accent: #3f6b43;
+  --color-accent-tint: #e4eedf;
+  --color-accent-tint-foreground: #2f5233;
+
+  --color-info: #5b4a96;
+  --color-info-tint: #eeeaf7;
+  --color-info-tint-foreground: #3a2a1e;
+
+  --color-warning-tint: #fdf0d5;
+  --color-warning-tint-foreground: #3a2a1e;
+
+  --color-destructive: #8a1f1f;
+  --color-destructive-tint: #fbeaea;
+
+  --color-ring: #b8452a;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-foreground: var(--color-foreground);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-border: var(--color-border);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-foreground: var(--color-primary-foreground);
+
+  --color-secondary: var(--color-secondary);
+  --color-secondary-hover: var(--color-secondary-hover);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+
+  --color-accent: var(--color-accent);
+  --color-accent-tint: var(--color-accent-tint);
+  --color-accent-tint-foreground: var(--color-accent-tint-foreground);
+
+  --color-info: var(--color-info);
+  --color-info-tint: var(--color-info-tint);
+  --color-info-tint-foreground: var(--color-info-tint-foreground);
+
+  --color-warning-tint: var(--color-warning-tint);
+  --color-warning-tint-foreground: var(--color-warning-tint-foreground);
+
+  --color-destructive: var(--color-destructive);
+  --color-destructive-tint: var(--color-destructive-tint);
+
+  --color-ring: var(--color-ring);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-karla);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* Visible, high-contrast focus ring on every interactive element, not just
+   inputs Tailwind happens to style — this is the load-bearing check for the
+   keyboard-navigation pass (7.2). */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0.5rem;
+  z-index: 50;
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* Shared classes for the handful of markup patterns (text input, primary
+   button, card) repeated verbatim across every auth/quiz/admin form. */
+@layer components {
+  .field-input {
+    @apply w-full rounded-md border border-border bg-surface px-3 py-2 text-foreground;
+  }
+
+  .btn-primary {
+    @apply rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .card {
+    @apply rounded-lg border border-border bg-surface p-4;
+  }
 }

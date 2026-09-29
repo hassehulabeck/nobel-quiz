@@ -7,7 +7,7 @@ import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/email";
 import { enforceRateLimit, RateLimitError } from "@/lib/rateLimit";
 import { generateUniqueDisplayName } from "./displayName";
 import { hashPassword, verifyPassword } from "./password";
-import { createSession, destroySession } from "./session";
+import { createSession, destroySession, getCurrentUser } from "./session";
 import { generateToken } from "./tokens";
 
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -230,4 +230,43 @@ export async function resetPassword(
   ]);
 
   redirect("/login");
+}
+
+const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Password is required"),
+});
+
+// Self-service, immediate, hard delete (TASKS.md 8.2, resolved 2026-09-28):
+// this is a small single-instance deployment with no admin queue to route
+// deletion requests through, so gating it behind an admin adds latency and
+// a second person to a request the user is already authenticated for.
+// Cascading FKs on Session/VerificationToken/Submission (see schema.prisma)
+// mean a single `user.delete` leaves no orphaned rows.
+export async function deleteAccount(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: "You must be logged in to delete your account." };
+  }
+
+  if (formData.get("confirmDelete") !== "on") {
+    return { error: "Please confirm you understand this cannot be undone." };
+  }
+
+  const parsed = deleteAccountSchema.safeParse({
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  if (!(await verifyPassword(parsed.data.password, user.passwordHash))) {
+    return { error: "Incorrect password" };
+  }
+
+  await prisma.user.delete({ where: { id: user.id } });
+  await destroySession();
+  redirect("/login?deleted=1");
 }
