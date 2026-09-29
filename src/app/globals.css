@@ -36,6 +36,16 @@
   --color-destructive-tint: #fbeaea;
 
   --color-ring: #b8452a;
+
+  /* Warmth: headings in a deep coral-red, and a peach glow at the top of the
+     page that fades into --color-background. Both are contrast-checked. */
+  --color-heading: #9a3a22;
+  --color-peach: #fde3c4;
+
+  /* Decorative only (the left-edge flower band) — never carries text. */
+  --edge-red: #b8452a;
+  --edge-marigold: #f2b632;
+  --edge-width: clamp(1.25rem, 4.5vw, 3.25rem);
 }
 
 @theme inline {
@@ -69,14 +79,41 @@
 
   --color-ring: var(--color-ring);
 
+  --color-heading: var(--color-heading);
+  --color-peach: var(--color-peach);
+
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-karla);
 }
 
 body {
-  background: var(--color-background);
+  background-color: var(--color-background);
+  background-image: linear-gradient(
+    180deg,
+    var(--color-peach) 0,
+    var(--color-background) 24rem
+  );
+  background-repeat: no-repeat;
   color: var(--color-foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Keeps all content clear of the flower band, so text never sits on it. */
+  padding-left: var(--edge-width);
+}
+
+/* Flower-and-petal band down the left edge of every page. Pure decoration:
+   generated content with no text, invisible to screen readers, and not
+   focusable or clickable. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--edge-width);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 120%22%3E%3Crect width=%2240%22 height=%22120%22 fill=%22%23b8452a%22/%3E%3Ccircle cx=%2220.00%22 cy=%2221.40%22 r=%226.6%22 fill=%22%23e8833a%22/%3E%3Ccircle cx=%2228.18%22 cy=%2227.34%22 r=%226.6%22 fill=%22%23e8833a%22/%3E%3Ccircle cx=%2225.05%22 cy=%2236.96%22 r=%226.6%22 fill=%22%23e8833a%22/%3E%3Ccircle cx=%2214.95%22 cy=%2236.96%22 r=%226.6%22 fill=%22%23e8833a%22/%3E%3Ccircle cx=%2211.82%22 cy=%2227.34%22 r=%226.6%22 fill=%22%23e8833a%22/%3E%3Ccircle cx=%2220%22 cy=%2230%22 r=%225.2%22 fill=%22%23f2b632%22/%3E%3Ccircle cx=%2220%22 cy=%2230%22 r=%222.1%22 fill=%22%23b8452a%22/%3E%3Ccircle cx=%2220.00%22 cy=%2281.80%22 r=%226.0%22 fill=%22%23f7c9a0%22/%3E%3Ccircle cx=%2227.80%22 cy=%2287.47%22 r=%226.0%22 fill=%22%23f7c9a0%22/%3E%3Ccircle cx=%2224.82%22 cy=%2296.63%22 r=%226.0%22 fill=%22%23f7c9a0%22/%3E%3Ccircle cx=%2215.18%22 cy=%2296.63%22 r=%226.0%22 fill=%22%23f7c9a0%22/%3E%3Ccircle cx=%2212.20%22 cy=%2287.47%22 r=%226.0%22 fill=%22%23f7c9a0%22/%3E%3Ccircle cx=%2220%22 cy=%2290%22 r=%225.2%22 fill=%22%23d9562b%22/%3E%3Ccircle cx=%2220%22 cy=%2290%22 r=%222.1%22 fill=%22%23fbf3e7%22/%3E%3Cpath d=%22M20 57l3.2 3-3.2 3-3.2-3z%22 fill=%22%23fbf3e7%22/%3E%3Ccircle cx=%227%22 cy=%2260%22 r=%221.9%22 fill=%22%23f2b632%22/%3E%3Ccircle cx=%2233%22 cy=%2260%22 r=%221.9%22 fill=%22%23f2b632%22/%3E%3Ccircle cx=%2220%22 cy=%220%22 r=%222.2%22 fill=%22%23f2b632%22/%3E%3Ccircle cx=%2220%22 cy=%22120%22 r=%222.2%22 fill=%22%23f2b632%22/%3E%3Ccircle cx=%226%22 cy=%220%22 r=%221.6%22 fill=%22%23fbf3e7%22/%3E%3Ccircle cx=%2234%22 cy=%220%22 r=%221.6%22 fill=%22%23fbf3e7%22/%3E%3Ccircle cx=%226%22 cy=%22120%22 r=%221.6%22 fill=%22%23fbf3e7%22/%3E%3Ccircle cx=%2234%22 cy=%22120%22 r=%221.6%22 fill=%22%23fbf3e7%22/%3E%3C/svg%3E")
+      left top / 100% auto repeat-y,
+    var(--edge-red);
+  border-right: 4px solid var(--edge-marigold);
+  pointer-events: none;
 }
 
 h1,
@@ -84,6 +121,7 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display), Georgia, serif;
+  color: var(--color-heading);
 }
 
 /* Visible, high-contrast focus ring on every interactive element, not just
@@ -123,5 +161,6 @@ h4 {
 
   .card {
     @apply rounded-lg border border-border bg-surface p-4;
+    border-top: 4px solid var(--color-primary);
   }
 }

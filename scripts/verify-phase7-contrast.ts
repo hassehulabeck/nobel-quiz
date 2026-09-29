@@ -69,6 +69,18 @@ checkText("info tint text on its tint bg", "--color-info-tint-foreground", "--co
 checkText("warning tint text on its tint bg", "--color-warning-tint-foreground", "--color-warning-tint", 4.5);
 checkText("destructive text on its tint bg", "--color-destructive", "--color-destructive-tint", 4.5);
 
+// Warmth pass (2026-09-29): headings are coloured, and the top of the page
+// fades from --color-peach into the background, so text that can land on
+// the peach end must be checked there too.
+checkText("heading on page background", "--color-heading", "--color-background", 4.5);
+checkText("heading on peach glow", "--color-heading", "--color-peach", 4.5);
+checkText("heading on surface", "--color-heading", "--color-surface", 4.5);
+checkText("heading on warning tint", "--color-heading", "--color-warning-tint", 4.5);
+checkText("body text on peach glow", "--color-foreground", "--color-peach", 4.5);
+checkText("muted text on peach glow", "--color-muted-foreground", "--color-peach", 4.5);
+checkText("link color on peach glow", "--color-primary-hover", "--color-peach", 4.5);
+checkText("card top edge vs surface", "--color-primary", "--color-surface", 3);
+
 // UI component / non-text boundaries (3:1) — borders and focus rings need
 // to be visible against the backgrounds they sit on, not readable as text.
 checkText("border vs page background", "--color-border", "--color-background", 3);
