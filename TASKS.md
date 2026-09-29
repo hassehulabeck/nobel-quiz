@@ -147,10 +147,12 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 ## Phase 10 — End-to-end QA
 **Depends on:** everything above, at least in a staging-quality state.
 
-- [ ] **10.1** Full dry run using the *2025* results as if they were live: seed 2026 questions, fast-forward mocked "announcement times" to the past, run the scraper against real 2025 nobelprize.org pages, confirm scoring and leaderboard match hand-calculated expectations from `nobeldata.md`.
+- [x] **10.1** Full dry run using the *2025* results as if they were live: seed 2026 questions, fast-forward mocked "announcement times" to the past, run the scraper against real 2025 nobelprize.org pages, confirm scoring and leaderboard match hand-calculated expectations from `nobeldata.md`.
   **Verify:** a test user's total score after all 6 mocked "2026" prizes matches a hand computation done independently from the code, using the formula in METHODS.md.
-- [ ] **10.2** Multi-user concurrency smoke test: several accounts answering, changing answers before deadline, and viewing the leaderboard at once.
+  **Result:** `scripts/verify-phase10-dryrun.ts` (30/30) — scratch DB, 2026 seed moved to the real 2025 dates, real scheduler against api.nobelprize.org; all 12 auto proposals equal the hand key, four users' totals equal hand sums (28.788 / 7.285 / 14.617 / 5), non-answerer absent.
+- [x] **10.2** Multi-user concurrency smoke test: several accounts answering, changing answers before deadline, and viewing the leaderboard at once.
   **Verify:** no answer submitted by one user ever appears attributed to another; leaderboard totals stay internally consistent (sum of visible top-ten "today" points is plausible given known test submissions).
+  **Result:** `scripts/verify-phase10-concurrency.ts` (10/10) — 8 browsers on their own Next server + scratch DB; found and fixed a float-drift display bug in the leaderboard totals.
 
 ---
 

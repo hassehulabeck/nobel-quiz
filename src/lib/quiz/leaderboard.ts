@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { computeSubmissionPoints } from "@/lib/scoring";
+import { computeSubmissionPoints, roundPoints } from "@/lib/scoring";
 import { isSameStockholmDay } from "@/lib/timezone";
 
 export type LeaderboardEntry = {
@@ -75,8 +75,10 @@ export async function computeLeaderboard(): Promise<LeaderboardEntry[]> {
     .map(([userId, v]) => ({
       userId,
       displayName: v.displayName,
-      totalPoints: v.total,
-      todayPoints: v.today,
+      // Summing 3-decimal option values in floating point drifts
+      // (15.203999999999999); round to the precision the points are stored at.
+      totalPoints: roundPoints(v.total),
+      todayPoints: roundPoints(v.today),
     }))
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
