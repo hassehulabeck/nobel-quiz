@@ -175,3 +175,11 @@ Instructions.md says "build the game to be prepared for" URLs that vary year to 
 ## 2026-09-29 — Phase 8: GDPR notice and account deletion (found already implemented)
 
 Same stale-checkbox situation as earlier phases. `/privacy` (`src/app/privacy/page.tsx`), the signup-page summary + link, the logged-in footer link, and `deleteAccount` were all already in the working tree. **Decision: self-service, immediate hard delete** (rather than admin-assisted): the user must be logged in, tick a confirmation box and re-enter their password; a single `user.delete` cascades to sessions, tokens and submissions, then redirects to `/login?deleted=1`. Chosen because it needs no admin involvement for a small private game and satisfies the "delete outright, no anonymized retention" decision of 2026-09-28. Verified by `scripts/verify-phase8.ts` (17/17 checks against the local dev DB, including zero orphaned rows and a leaderboard that still computes).
+
+---
+
+## 2026-09-29 — Phase 9: first Railway deploy
+
+- **Topology:** Railway project `nobel-quiz` now has two services: `Postgres` and `web` (Railpack build, source = GitHub `hassehulabeck/nobel-quiz`, branch `main`, deploys on push). Public URL: `https://web-production-e4497.up.railway.app`. Variables on `web`: `DATABASE_URL` (= `${{Postgres.DATABASE_URL}}`, the internal address), `RESEND_API_KEY`, `APP_BASE_URL`. No session secret exists or is needed — sessions are DB-backed (Phase 3).
+- **`railway.json` is ignored/deprecated.** Railway now treats Config-as-Code files as deprecated (the MCP `update-service` call rejected `railwayConfigFile: railway.json`), and the first deploy ran no `prisma migrate deploy` although the file requested one — production stayed one migration behind and the scheduler failed every tick on a missing column. The file was removed; the pre-deploy command is instead set on the service itself (`npx prisma migrate deploy`).
+- **Redeploys are not a valid test of the pipeline.** A "redeploy" reuses the prior build; only a fresh push exercises build + pre-deploy.
