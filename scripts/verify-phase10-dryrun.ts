@@ -59,6 +59,8 @@ const KEY: Key[] = [
   { id: "ww_africa", fragment: "residing in Africa", label: "No", points: 1.25, auto: true },
   // At most 6 of the 2025 laureates can be US citizens even on the most
   // generous reading (Clarke, Devoret, Martinis, Brunkow, Ramsdell, Mokyr).
+  // Devoret (Yale) and Howitt (Brown); 5 of 20 years had exactly two.
+  { id: "ww_ivy", fragment: "Ivy League", label: "2", points: 4, auto: true },
   { id: "ww_us", fragment: "American citizens", label: "6 or fewer", points: 1.818, auto: false },
 ];
 const keyById = new Map(KEY.map((k) => [k.id, k]));
@@ -72,8 +74,8 @@ const wrongLabel: Record<string, string> = {
 };
 const ALL_IDS = KEY.map((k) => k.id);
 const USERS = [
-  // Every answer right: sum of all sixteen point values.
-  { name: "Ada", correct: ALL_IDS, wrong: [] as string[], expected: 28.788 },
+  // Every answer right: sum of all seventeen point values.
+  { name: "Ada", correct: ALL_IDS, wrong: [] as string[], expected: 32.788 },
   // Right on the four laureate-count questions, wrong on two others,
   // silent on the rest: 1.538 + 1.429 + 1.818 + 2.5.
   { name: "Ben", correct: ["phys_count", "chem_count", "med_count", "econ_count"], wrong: ["peace_split", "ww_female"], expected: 7.285 },
@@ -122,7 +124,7 @@ async function main() {
         if (matches.length !== 1) throw new Error(`key ${k.id}: ${matches.length} matching questions`);
         qByKey.set(k.id, matches[0]);
       }
-      log("all 16 seeded questions map one-to-one onto the hand answer key", qByKey.size === 16 && questions.length === 16);
+      log("all 17 seeded questions map one-to-one onto the hand answer key", qByKey.size === 17 && questions.length === 17);
 
       // --- Users and answers, made while the game was still "open" -------
       const userIds = new Map<string, string>();

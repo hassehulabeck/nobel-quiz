@@ -266,4 +266,22 @@ export const WHOLE_WEEK_QUESTIONS: {
       option("9 or more", 2, 20),
     ],
   },
+  {
+    // Computed from nobeldata.md's per-laureate affiliation column, 2006-2025,
+    // counting each laureate with a Brown, Columbia, Cornell, Dartmouth,
+    // Harvard, Princeton, UPenn or Yale affiliation once (Harvard Medical
+    // School/MGH counts as Harvard; the Institute for Advanced Study is an
+    // independent institution and does not count as Princeton). Laureates
+    // per year: 0 in 5 years (2007, 2010, 2014, 2020, 2022), 1 in 6 (2006,
+    // 2011, 2012, 2015, 2017, 2018), 2 in 5 (2008, 2009, 2021, 2024, 2025),
+    // 3 or more in 4 (2013, 2016, 2019 with 3; 2023 with 4).
+    text: "How many of this year's laureates will have an Ivy League affiliation (Brown, Columbia, Cornell, Dartmouth, Harvard, Princeton, University of Pennsylvania or Yale)?",
+    gradingKey: "WHOLE_WEEK_IVY_COUNT",
+    options: [
+      option("0", 5, 20, "0"),
+      option("1", 6, 20, "1"),
+      option("2", 5, 20, "2"),
+      option("3 or more", 4, 20, "3+"),
+    ],
+  },
 ];

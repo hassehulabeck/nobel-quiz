@@ -61,7 +61,27 @@ function anyMitAffiliation(laureates: ScrapedLaureate[]): boolean {
   );
 }
 
-function bucketFemaleCount(count: number): string {
+// Word-boundary patterns so "University of British Columbia" or "Penn State"
+// don't count. The Institute for Advanced Study is independent of Princeton.
+const IVY_LEAGUE_PATTERNS = [
+  /\bbrown university\b/,
+  /\bcolumbia university\b/,
+  /\bcornell\b/,
+  /\bdartmouth\b/,
+  /\bharvard\b/,
+  /\bprinceton university\b/,
+  /\buniversity of pennsylvania\b/,
+  /\byale\b/,
+];
+
+function countIvyLeagueAffiliations(laureates: ScrapedLaureate[]): number {
+  return laureates.filter((l) => {
+    const name = (l.affiliationName ?? "").toLowerCase();
+    return IVY_LEAGUE_PATTERNS.some((re) => re.test(name));
+  }).length;
+}
+
+function bucketCountAtLeast3(count: number): string {
   if (count >= 3) return "3+";
   return String(count);
 }
@@ -181,7 +201,7 @@ export function gradeWholeWeekQuestion(
         (l) => l.gender === "female"
       ).length;
       return {
-        computedValue: bucketFemaleCount(femaleCount),
+        computedValue: bucketCountAtLeast3(femaleCount),
         confidence: "high",
         rawScrapedData,
       };
@@ -217,6 +237,16 @@ export function gradeWholeWeekQuestion(
         rawScrapedData,
       };
     }
+
+    case "WHOLE_WEEK_IVY_COUNT":
+      return {
+        computedValue: bucketCountAtLeast3(
+          countIvyLeagueAffiliations(allLaureates)
+        ),
+        // Low confidence: the API lists only a laureate's first affiliation.
+        confidence: "low",
+        rawScrapedData,
+      };
 
     default:
       return { computedValue: null, confidence: "low", rawScrapedData };

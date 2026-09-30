@@ -5,7 +5,10 @@ import {
   resolveProposal,
 } from "./grader";
 import type { ScrapedLaureate, ScrapedPrizeData } from "./nobelApi";
-import { PRIZE_QUESTIONS, WHOLE_WEEK_QUESTIONS } from "../../../prisma/seedData";
+import {
+  PRIZE_QUESTIONS,
+  WHOLE_WEEK_QUESTIONS,
+} from "../../../prisma/seedData";
 
 /**
  * TASKS.md 6.3's verify condition: feed real 2025 outcomes (from
@@ -203,17 +206,19 @@ describe("gradePrizeSpecificQuestion + resolveProposal against real 2025 outcome
       "LAUREATE_COUNT",
       physics2025
     );
-    expect(
-      resolveProposal(countProposal, options("PHYSICS", 0))
-    ).toEqual({ correctAnswerOptionId: "PHYSICS-0-1", noneMatched: false }); // "3 laureates"
+    expect(resolveProposal(countProposal, options("PHYSICS", 0))).toEqual({
+      correctAnswerOptionId: "PHYSICS-0-1",
+      noneMatched: false,
+    }); // "3 laureates"
 
     const phraseProposal = gradePrizeSpecificQuestion(
       "PHRASE_DISCOVERY_OF",
       physics2025
     );
-    expect(
-      resolveProposal(phraseProposal, options("PHYSICS", 1))
-    ).toEqual({ correctAnswerOptionId: "PHYSICS-1-0", noneMatched: false }); // "Yes"
+    expect(resolveProposal(phraseProposal, options("PHYSICS", 1))).toEqual({
+      correctAnswerOptionId: "PHYSICS-1-0",
+      noneMatched: false,
+    }); // "Yes"
   });
 
   it("Chemistry: 3 laureates, development-of opening", () => {
@@ -221,17 +226,19 @@ describe("gradePrizeSpecificQuestion + resolveProposal against real 2025 outcome
       "LAUREATE_COUNT",
       chemistry2025
     );
-    expect(
-      resolveProposal(countProposal, options("CHEMISTRY", 0))
-    ).toEqual({ correctAnswerOptionId: "CHEMISTRY-0-2", noneMatched: false }); // "3 laureates"
+    expect(resolveProposal(countProposal, options("CHEMISTRY", 0))).toEqual({
+      correctAnswerOptionId: "CHEMISTRY-0-2",
+      noneMatched: false,
+    }); // "3 laureates"
 
     const phraseProposal = gradePrizeSpecificQuestion(
       "PHRASE_DEVELOPMENT_OF",
       chemistry2025
     );
-    expect(
-      resolveProposal(phraseProposal, options("CHEMISTRY", 1))
-    ).toEqual({ correctAnswerOptionId: "CHEMISTRY-1-0", noneMatched: false }); // "Yes"
+    expect(resolveProposal(phraseProposal, options("CHEMISTRY", 1))).toEqual({
+      correctAnswerOptionId: "CHEMISTRY-1-0",
+      noneMatched: false,
+    }); // "Yes"
   });
 
   it("Medicine: 3 laureates, motivation contains 'discover'", () => {
@@ -239,17 +246,19 @@ describe("gradePrizeSpecificQuestion + resolveProposal against real 2025 outcome
       "LAUREATE_COUNT",
       medicine2025
     );
-    expect(
-      resolveProposal(countProposal, options("MEDICINE", 0))
-    ).toEqual({ correctAnswerOptionId: "MEDICINE-0-2", noneMatched: false }); // "3 laureates"
+    expect(resolveProposal(countProposal, options("MEDICINE", 0))).toEqual({
+      correctAnswerOptionId: "MEDICINE-0-2",
+      noneMatched: false,
+    }); // "3 laureates"
 
     const phraseProposal = gradePrizeSpecificQuestion(
       "PHRASE_CONTAINS_DISCOVER",
       medicine2025
     );
-    expect(
-      resolveProposal(phraseProposal, options("MEDICINE", 1))
-    ).toEqual({ correctAnswerOptionId: "MEDICINE-1-0", noneMatched: false }); // "Yes"
+    expect(resolveProposal(phraseProposal, options("MEDICINE", 1))).toEqual({
+      correctAnswerOptionId: "MEDICINE-1-0",
+      noneMatched: false,
+    }); // "Yes"
   });
 
   it("Economics: 3 laureates, no MIT affiliation", () => {
@@ -257,17 +266,19 @@ describe("gradePrizeSpecificQuestion + resolveProposal against real 2025 outcome
       "LAUREATE_COUNT",
       economics2025
     );
-    expect(
-      resolveProposal(countProposal, options("ECONOMICS", 0))
-    ).toEqual({ correctAnswerOptionId: "ECONOMICS-0-2", noneMatched: false }); // "3 laureates"
+    expect(resolveProposal(countProposal, options("ECONOMICS", 0))).toEqual({
+      correctAnswerOptionId: "ECONOMICS-0-2",
+      noneMatched: false,
+    }); // "3 laureates"
 
     const mitProposal = gradePrizeSpecificQuestion(
       "AFFILIATION_MIT",
       economics2025
     );
-    expect(
-      resolveProposal(mitProposal, options("ECONOMICS", 1))
-    ).toEqual({ correctAnswerOptionId: "ECONOMICS-1-1", noneMatched: false }); // "No"
+    expect(resolveProposal(mitProposal, options("ECONOMICS", 1))).toEqual({
+      correctAnswerOptionId: "ECONOMICS-1-1",
+      noneMatched: false,
+    }); // "No"
   });
 
   it("Peace: a single individual laureate", () => {
@@ -339,6 +350,56 @@ describe("gradeWholeWeekQuestion against real 2025 outcomes", () => {
       correctAnswerOptionId: "whole-week-2-1", // "No"
       noneMatched: false,
     });
+  });
+
+  it("counts 2 Ivy League laureates in 2025 (Devoret at Yale, Howitt at Brown) and ignores look-alikes", () => {
+    const withIvy = {
+      ...allSix2025,
+      PHYSICS: {
+        ...physics2025,
+        laureates: [
+          laureate("Devoret", { affiliationName: "Yale University" }),
+          laureate("BC", { affiliationName: "University of British Columbia" }),
+          laureate("IAS", { affiliationName: "Institute for Advanced Study" }),
+          laureate("PSU", { affiliationName: "Pennsylvania State University" }),
+        ],
+      },
+      CHEMISTRY: { ...chemistry2025, laureates: [] },
+      MEDICINE: { ...medicine2025, laureates: [] },
+      LITERATURE: { ...literature2025, laureates: [] },
+      PEACE: { ...peace2025, laureates: [] },
+      ECONOMICS: {
+        ...economics2025,
+        laureates: [
+          laureate("Howitt", { affiliationName: "Brown University" }),
+        ],
+      },
+    };
+    const proposal = gradeWholeWeekQuestion("WHOLE_WEEK_IVY_COUNT", withIvy);
+    expect(proposal.computedValue).toBe("2");
+    expect(resolveProposal(proposal, wholeWeekOptions(4))).toEqual({
+      correctAnswerOptionId: "whole-week-4-2", // "2"
+      noneMatched: false,
+    });
+  });
+
+  it("buckets 4 Ivy laureates (2023-style) as '3+'", () => {
+    const four = [
+      "Harvard University",
+      "Harvard Medical School",
+      "Columbia University",
+      "University of Pennsylvania",
+    ].map((n, i) => laureate(`L${i}`, { affiliationName: n }));
+    const proposal = gradeWholeWeekQuestion("WHOLE_WEEK_IVY_COUNT", {
+      ...allSix2025,
+      PHYSICS: { ...physics2025, laureates: four },
+      CHEMISTRY: { ...chemistry2025, laureates: [] },
+      MEDICINE: { ...medicine2025, laureates: [] },
+      ECONOMICS: { ...economics2025, laureates: [] },
+      LITERATURE: { ...literature2025, laureates: [] },
+      PEACE: { ...peace2025, laureates: [] },
+    });
+    expect(proposal.computedValue).toBe("3+");
   });
 
   it("returns an unresolved (null) proposal when not all six prizes have been scraped yet", () => {
