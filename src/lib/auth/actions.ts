@@ -8,6 +8,7 @@ import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/email";
 import { enforceRateLimit, RateLimitError } from "@/lib/rateLimit";
 import { generateUniqueDisplayName } from "./displayName";
 import { checkCustomDisplayName } from "./displayNameRules";
+import { isDisplayNameTaken } from "./nameTaken";
 import { hashPassword, verifyPassword } from "./password";
 import { createSession, destroySession, getCurrentUser } from "./session";
 import { generateToken } from "./tokens";
@@ -128,7 +129,7 @@ export async function login(
 
 export async function logout() {
   await destroySession();
-  redirect("/login");
+  redirect("/");
 }
 
 const requestResetSchema = z.object({
@@ -314,14 +315,7 @@ export async function updateDisplayName(
     name = check.name;
   }
 
-  const clash = await prisma.user.findFirst({
-    where: {
-      displayName: { equals: name, mode: "insensitive" },
-      NOT: { id: user.id },
-    },
-    select: { id: true },
-  });
-  if (clash) return { error: "That name is already taken" };
+  if (await isDisplayNameTaken(name, user.id)) return { error: "That name is already taken" };
 
   try {
     await prisma.user.update({

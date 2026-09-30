@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Your account — Nobel Quiz" };
 
 export default async function AccountPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const info = laureateInfoFor(user.displayName);
 

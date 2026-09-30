@@ -1,10 +1,26 @@
 import { formatStockholmDay, isSameStockholmDay } from "@/lib/timezone";
 import type { QuestionView } from "@/lib/quiz/getQuizData";
 import { QuestionForm } from "./QuestionForm";
-import { QuestionAwaitingResult, QuestionGraded } from "./QuestionReadOnly";
+import {
+  QuestionAwaitingResult,
+  QuestionGraded,
+  QuestionLocked,
+} from "./QuestionReadOnly";
 
-function QuestionCard({ question }: { question: QuestionView }) {
-  if (question.status === "open") return <QuestionForm question={question} />;
+function QuestionCard({
+  question,
+  locked,
+}: {
+  question: QuestionView;
+  locked: boolean;
+}) {
+  if (question.status === "open") {
+    return locked ? (
+      <QuestionLocked question={question} />
+    ) : (
+      <QuestionForm question={question} />
+    );
+  }
   if (question.status === "awaiting_result") {
     return <QuestionAwaitingResult question={question} />;
   }
@@ -16,7 +32,14 @@ function QuestionCard({ question }: { question: QuestionView }) {
  * between days), then a heavier rule and the whole-week questions. Expects
  * `questions` already sorted by getQuizPageData.
  */
-export function QuestionsByDay({ questions }: { questions: QuestionView[] }) {
+export function QuestionsByDay({
+  questions,
+  locked = false,
+}: {
+  questions: QuestionView[];
+  /** Guests: open questions show their locked answer instead of an edit form. */
+  locked?: boolean;
+}) {
   const days: {
     label: string;
     prizeName: string;
@@ -56,7 +79,11 @@ export function QuestionsByDay({ questions }: { questions: QuestionView[] }) {
             {day.prizeName}
           </h2>
           {day.items.map((question) => (
-            <QuestionCard key={question.id} question={question} />
+            <QuestionCard
+              key={question.id}
+              question={question}
+              locked={locked}
+            />
           ))}
         </section>
       ))}
@@ -73,7 +100,11 @@ export function QuestionsByDay({ questions }: { questions: QuestionView[] }) {
             announcement.
           </p>
           {wholeWeek.map((question) => (
-            <QuestionCard key={question.id} question={question} />
+            <QuestionCard
+              key={question.id}
+              question={question}
+              locked={locked}
+            />
           ))}
         </section>
       )}

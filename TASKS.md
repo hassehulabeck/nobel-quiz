@@ -170,6 +170,13 @@ Tasks are grouped into phases. Within a phase, tasks are written to be as non-bl
 
 ---
 
+## Phase 9c — Guest entries (requested 2026-09-30)
+
+- [x] **9c.1** No-registration "shortcut": `/play` shows one form (name + every still-open question); submitting stores the answers once and lands on a private `/guest/<token>` page. No edit path exists. Guests share the leaderboard with registered users; one entry per browser (cookie) plus a per-IP hourly rate limit and a honeypot; guests can delete their entry. Decisions in METHODS.md ("Guest entries").
+  **Verify:** `scripts/verify-guest-entry.ts` (31 checks, scratch DB + own Next server) — stored answers equal the picks; no inputs/edit forms on the guest page; revisit bounces to the existing entry; case-insensitive name clashes with guests and registered users, laureate names, empty entries and just-closed questions are rejected server-side; guest and registered user with the same answer tie on one board; unknown token 404; delete removes everything and kills the link. `verify-phase10-concurrency.ts` and `verify-phase10-dryrun.ts` re-run green after the leaderboard change.
+
+---
+
 ## Open items requiring a decision before the relevant phase starts
 - None currently outstanding.
 

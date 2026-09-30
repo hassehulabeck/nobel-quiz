@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Admin — result grading — Nobel Q
 
 export default async function AdminResultsPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
   if (!user.isAdmin) {
     return (
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl flex-1 px-4 py-16 outline-none">

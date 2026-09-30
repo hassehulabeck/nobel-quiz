@@ -36,13 +36,13 @@ enum ResultStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String   @id @default(cuid())
+  email         String   @unique
   passwordHash  String
-  displayName   String    @unique
-  emailVerified Boolean   @default(false)
-  isAdmin       Boolean   @default(false)
-  createdAt     DateTime  @default(now())
+  displayName   String   @unique
+  emailVerified Boolean  @default(false)
+  isAdmin       Boolean  @default(false)
+  createdAt     DateTime @default(now())
 
   sessions           Session[]
   verificationTokens VerificationToken[]
@@ -103,11 +103,12 @@ model Question {
   /// auto-graded on, e.g. "LAUREATE_COUNT", "AFFILIATION_MIT". Null means no
   /// reliable auto-signal exists (citizenship, Literature genre) and grading
   /// is always admin-entered — see METHODS.md's Phase 6 entry.
-  gradingKey String?
+  gradingKey     String?
 
-  options     AnswerOption[]
-  submissions Submission[]
-  result      Result?
+  options          AnswerOption[]
+  submissions      Submission[]
+  guestSubmissions GuestSubmission[]
+  result           Result?
 
   @@index([prizeId])
 }
@@ -127,10 +128,11 @@ model AnswerOption {
   /// Canonical machine-comparable value for the question's `gradingKey`
   /// (e.g. "2", "yes", "individual") — kept separate from the free-text
   /// `label` so player-facing copy can change without touching grading.
-  matchValue String?
+  matchValue      String?
 
   submissions      Submission[]
-  resultsAsCorrect Result[]     @relation("CorrectOption")
+  guestSubmissions GuestSubmission[]
+  resultsAsCorrect Result[]          @relation("CorrectOption")
 
   @@index([questionId])
 }
@@ -149,6 +151,33 @@ model Submission {
   updatedAt      DateTime     @updatedAt
 
   @@unique([userId, questionId])
+  @@index([questionId])
+}
+
+/// A no-registration player (see METHODS.md, "Guest entries"). No email, no
+/// password: `token` is the secret in the private entry URL and in the
+/// `nq_guest` cookie. Answers are written once, in a single transaction with
+/// this row, and never updated — there is deliberately no edit path.
+model GuestPlayer {
+  id          String   @id @default(cuid())
+  displayName String   @unique
+  token       String   @unique
+  createdAt   DateTime @default(now())
+
+  submissions GuestSubmission[]
+}
+
+model GuestSubmission {
+  id             String       @id @default(cuid())
+  guestId        String
+  guest          GuestPlayer  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerOptionId String
+  answerOption   AnswerOption @relation(fields: [answerOptionId], references: [id])
+  createdAt      DateTime     @default(now())
+
+  @@unique([guestId, questionId])
   @@index([questionId])
 }
 

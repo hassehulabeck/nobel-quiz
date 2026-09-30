@@ -81,6 +81,13 @@ checkText("muted text on peach glow", "--color-muted-foreground", "--color-peach
 checkText("link color on peach glow", "--color-primary-hover", "--color-peach", 4.5);
 checkText("card top edge vs surface", "--color-primary", "--color-surface", 3);
 
+// Landing page colour pass (2026-09-30): navy hero, teal tint cards.
+checkText("navy hero text", "--color-navy-foreground", "--color-navy", 4.5);
+checkText("gold on navy hero (headings/medal text)", "--color-gold", "--color-navy", 4.5);
+checkText("teal tint text on its tint bg", "--color-teal-tint-foreground", "--color-teal-tint", 4.5);
+checkText("heading on teal tint", "--color-heading", "--color-teal-tint", 4.5);
+checkText("teal edge vs surface", "--color-teal", "--color-surface", 3);
+
 // UI component / non-text boundaries (3:1) — borders and focus rings need
 // to be visible against the backgrounds they sit on, not readable as text.
 checkText("border vs page background", "--color-border", "--color-background", 3);

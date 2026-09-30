@@ -46,6 +46,14 @@
   --edge-red: #b8452a;
   --edge-marigold: #f2b632;
   --edge-width: clamp(1.25rem, 4.5vw, 3.25rem);
+
+  /* Landing page colour variation: Nobel navy + gold, and a teal tint. */
+  --color-navy: #1c2f52;
+  --color-navy-foreground: #fbf3e7;
+  --color-gold: #f2b632;
+  --color-teal-tint: #dff0f1;
+  --color-teal-tint-foreground: #143f44;
+  --color-teal: #1f6f78;
 }
 
 @theme inline {
@@ -81,6 +89,13 @@
 
   --color-heading: var(--color-heading);
   --color-peach: var(--color-peach);
+
+  --color-navy: var(--color-navy);
+  --color-navy-foreground: var(--color-navy-foreground);
+  --color-gold: var(--color-gold);
+  --color-teal-tint: var(--color-teal-tint);
+  --color-teal-tint-foreground: var(--color-teal-tint-foreground);
+  --color-teal: var(--color-teal);
 
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-karla);

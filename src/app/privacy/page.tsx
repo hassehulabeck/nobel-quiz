@@ -82,6 +82,18 @@ export default async function PrivacyPage() {
           </p>
         )}
       </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold">Playing as a guest</h2>
+        <p>
+          A guest entry stores only the name you chose and your answers, plus a
+          random secret that makes up your private link. No email or password.
+          Your name and points appear on the leaderboard like anyone
+          else&apos;s. It is kept until the quiz is reset, and you can delete it
+          at any time with the &ldquo;Delete my entry&rdquo; button on your
+          private page; that removes the name and every answer immediately.
+        </p>
+      </section>
     </main>
   );
 }

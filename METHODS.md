@@ -236,3 +236,17 @@ Requested because the launch look was too muted for the "cheery, flowery, warm" 
 - **Auto-grading:** key `WHOLE_WEEK_IVY_COUNT` in `grader.ts`, word-boundary name patterns (so British Columbia, Penn State don't match), always *low* confidence because the Nobel API exposes only a laureate's first affiliation. Admin approval applies as for every question.
 - **Rollout to a live game:** `prisma/seed.ts` wipes submissions, so it cannot be used now that players exist. `scripts/add-whole-week-question.ts <gradingKey>` inserts a single question from `seedData.ts` idempotently and touches nothing else.
 - **Verified:** 3 new unit tests (2025 case with look-alike names, 4 → "3+", existing suite 49/49); `verify-phase10-dryrun.ts` now covers 17 questions against the live Nobel API and the real 2025 outcome (Devoret/Yale + Howitt/Brown = "2") is proposed correctly, all totals still equal the hand key (Ada now 32.788 = 28.788 + 4); additive script run twice on the dev DB (second run a no-op).
+
+## Landing page refresh (2026-09-30)
+- Logged-out homepage now has a navy/gold hero with an inline-SVG medal, a non-persisting "Try a question" teaser (real Physics laureate-count question, points computed from the same 1/frequency rule) and a "The prize week" section (dates from the confirmed 2026 schedule, plus the awarding institutions). New navy/gold/teal tokens in `globals.css` are covered by `verify-phase7-contrast.ts`.
+- Images are inline SVG (no binary assets, no licensing questions, hidden from assistive tech).
+- Logging out, and visiting `/account` or `/admin/results` while logged out, now go to `/` instead of `/login`. Password-reset completion and account deletion still go to `/login` (they show a message there).
+
+## Guest entries (2026-09-30)
+Requested because potential players wouldn't register. Decisions (confirmed with the user):
+- **Same leaderboard** as registered users. Guests are keyed `guest:<id>` in `computeLeaderboard` so ids can't collide; display names are unique case-insensitively across users *and* guests (`isDisplayNameTaken`, also used by rename and random-name generation).
+- **One shot, all questions in one form** (`/play`): name + every question whose deadline hasn't passed (late visitors only see what's still open). Answers are written in the same transaction as the `GuestPlayer` row and never updated; no edit action exists. Deadlines, option ownership and name rules are re-checked server-side.
+- **Coming back:** a random 256-bit token in a private `/guest/<token>` URL (noindex, `no-referrer`) and in an httpOnly `nq_guest` cookie (1 year). The page shows locked answers, score and the shared leaderboard. The URL is the only credential, so a lost link means a lost entry; that is the price of no email.
+- **Abuse limits:** cookie (one entry per browser, `/play` redirects to the existing entry) + in-memory per-IP limit of 10 entries/hour (generous for an office behind one address) + a honeypot field. A determined person can still clear cookies and change IP; accepted, since any registration-free scheme has this weakness. No CAPTCHA (third party, extra friction).
+- **Privacy:** only the chosen name and answers are stored; "Delete my entry" removes them at once (cascade). Privacy page updated.
+- Schema: `GuestPlayer`, `GuestSubmission` (migration `guest_entries`). **Deploy note:** nothing manual. The Railway service's pre-deploy command (`npx prisma migrate deploy`, see the Railway notes above) applies the `guest_entries` migration on the next deploy. Check the deploy log for it.

@@ -26,7 +26,8 @@ export type QuestionView = {
 };
 
 export async function getQuizPageData(
-  userId: string | null
+  userId: string | null,
+  guestId?: string
 ): Promise<QuestionView[]> {
   const questions = await prisma.question.findMany({
     include: {
@@ -50,6 +51,14 @@ export async function getQuizPageData(
   if (userId) {
     const submissions = await prisma.submission.findMany({
       where: { userId },
+      select: { questionId: true, answerOptionId: true },
+    });
+    for (const submission of submissions) {
+      submissionByQuestionId.set(submission.questionId, submission);
+    }
+  } else if (guestId) {
+    const submissions = await prisma.guestSubmission.findMany({
+      where: { guestId },
       select: { questionId: true, answerOptionId: true },
     });
     for (const submission of submissions) {

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { LAUREATES } from "./laureateNames";
+import { isDisplayNameTaken } from "./nameTaken";
 
 const ADJECTIVES = [
   "Blooming",
@@ -46,13 +47,16 @@ function randomFrom<T>(list: T[]): T {
  * Names are compared case-insensitively, matching how renames are checked.
  */
 async function pickFreeLaureateName(): Promise<string | null> {
-  const taken = await prisma.user.findMany({
-    where: {
-      displayName: { in: LAUREATES.map((l) => l.name), mode: "insensitive" },
-    },
-    select: { displayName: true },
-  });
-  const takenLower = new Set(taken.map((u) => u.displayName.toLowerCase()));
+  const where = {
+    displayName: { in: LAUREATES.map((l) => l.name), mode: "insensitive" },
+  } as const;
+  const [users, guests] = await Promise.all([
+    prisma.user.findMany({ where, select: { displayName: true } }),
+    prisma.guestPlayer.findMany({ where, select: { displayName: true } }),
+  ]);
+  const takenLower = new Set(
+    [...users, ...guests].map((u) => u.displayName.toLowerCase())
+  );
   const free = LAUREATES.filter((l) => !takenLower.has(l.name.toLowerCase()));
   return free.length > 0 ? randomFrom(free).name : null;
 }
@@ -71,11 +75,7 @@ export async function generateUniqueDisplayName(): Promise<string> {
     const candidate =
       attempt < 10 ? base : `${base} ${Math.floor(Math.random() * 10000)}`;
 
-    const existing = await prisma.user.findUnique({
-      where: { displayName: candidate },
-      select: { id: true },
-    });
-    if (!existing) return candidate;
+    if (!(await isDisplayNameTaken(candidate))) return candidate;
   }
 
   throw new Error("Could not generate a unique display name after 20 attempts");

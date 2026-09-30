@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { computeSubmissionPoints, roundPoints } from "@/lib/scoring";
 import { isSameStockholmDay } from "@/lib/timezone";
 
+export const guestLeaderboardId = (guestId: string) => `guest:${guestId}`;
+
 export type LeaderboardEntry = {
   userId: string;
   displayName: string;
@@ -25,10 +27,32 @@ export async function computeLeaderboard(): Promise<LeaderboardEntry[]> {
   if (results.length === 0) return [];
 
   const questionIds = results.map((r) => r.questionId);
-  const submissions = await prisma.submission.findMany({
-    where: { questionId: { in: questionIds } },
-    include: { user: { select: { id: true, displayName: true } } },
-  });
+  const [userSubmissions, guestSubmissions] = await Promise.all([
+    prisma.submission.findMany({
+      where: { questionId: { in: questionIds } },
+      include: { user: { select: { id: true, displayName: true } } },
+    }),
+    prisma.guestSubmission.findMany({
+      where: { questionId: { in: questionIds } },
+      include: { guest: { select: { id: true, displayName: true } } },
+    }),
+  ]);
+  // Registered users and guests share one board; guests are keyed
+  // `guest:<id>` so the two id spaces can never collide.
+  const submissions = [
+    ...userSubmissions.map((s) => ({
+      questionId: s.questionId,
+      answerOptionId: s.answerOptionId,
+      userId: s.userId,
+      user: s.user,
+    })),
+    ...guestSubmissions.map((s) => ({
+      questionId: s.questionId,
+      answerOptionId: s.answerOptionId,
+      userId: guestLeaderboardId(s.guestId),
+      user: s.guest,
+    })),
+  ];
 
   const submissionsByQuestion = new Map<string, typeof submissions>();
   for (const submission of submissions) {

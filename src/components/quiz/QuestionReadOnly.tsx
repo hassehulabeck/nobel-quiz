@@ -55,3 +55,25 @@ export function QuestionGraded({ question }: { question: QuestionView }) {
     </div>
   );
 }
+
+/** A still-open question whose answer is locked in (guest entries can't be edited). */
+export function QuestionLocked({ question }: { question: QuestionView }) {
+  const userAnswer = question.options.find(
+    (o) => o.id === question.userAnswerOptionId
+  );
+
+  return (
+    <div className="card flex flex-col gap-2 border-l-4 border-l-info">
+      <p className="font-medium">
+        {question.prizeName ? `${question.prizeName}: ` : ""}
+        {question.text}
+      </p>
+      <p className="text-sm text-muted-foreground">
+        Your answer: {userAnswer ? userAnswer.label : "— (no answer submitted)"}
+      </p>
+      <p className="text-sm text-muted-foreground">
+        Locked in. Waiting for the announcement.
+      </p>
+    </div>
+  );
+}
