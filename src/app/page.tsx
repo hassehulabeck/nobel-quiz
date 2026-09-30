@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/session";
 import { logout } from "@/lib/auth/actions";
 import { getQuizPageData, isEndOfWeek } from "@/lib/quiz/getQuizData";
@@ -54,6 +55,10 @@ export default async function Home() {
   }
 
   if (!user) {
+    const userCount = await prisma.user.count({
+      where: { emailVerified: true },
+    });
+
     return (
       <main
         id="main-content"
@@ -71,6 +76,10 @@ export default async function Home() {
           bank. Every point lands on the live leaderboard, so think you know
           your Nobels better than your friends and colleagues? Prove it, and
           claim the top spot.
+        </p>
+        <p className="font-medium">
+          Now {userCount} guessing {userCount === 1 ? "user" : "users"} and
+          counting
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/login" className="btn-primary">
