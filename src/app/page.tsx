@@ -59,10 +59,12 @@ export default async function Home() {
   }
 
   if (!user) {
-    const [userCount, guest] = await Promise.all([
+    const [verifiedUserCount, guestCount, guest] = await Promise.all([
       prisma.user.count({ where: { emailVerified: true } }),
+      prisma.guestPlayer.count(),
       getCurrentGuest(),
     ]);
+    const userCount = verifiedUserCount + guestCount;
 
     return (
       <main
