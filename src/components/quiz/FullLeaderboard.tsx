@@ -46,7 +46,7 @@ export function FullLeaderboard({
                   suffix={entry.userId === currentUserId ? " (you)" : ""}
                 />
               </th>
-              <td className="text-right">{entry.totalPoints}</td>
+              <td className="text-right">{entry.totalPoints.toFixed(2)}</td>
             </tr>
           ))}
         </tbody>

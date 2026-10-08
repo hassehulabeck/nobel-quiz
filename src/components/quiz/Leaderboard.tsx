@@ -57,8 +57,8 @@ export function Leaderboard({
                   suffix={entry.userId === currentUserId ? " (you)" : ""}
                 />
               </th>
-              <td className="text-right">{entry.todayPoints}</td>
-              <td className="text-right">{entry.totalPoints}</td>
+              <td className="text-right">{entry.todayPoints.toFixed(2)}</td>
+              <td className="text-right">{entry.totalPoints.toFixed(2)}</td>
             </tr>
           ))}
           {!currentUserInTopTen && currentUserEntry && (
@@ -76,8 +76,12 @@ export function Leaderboard({
                     suffix=" (you)"
                   />
                 </th>
-                <td className="text-right">{currentUserEntry.todayPoints}</td>
-                <td className="text-right">{currentUserEntry.totalPoints}</td>
+                <td className="text-right">
+                  {currentUserEntry.todayPoints.toFixed(2)}
+                </td>
+                <td className="text-right">
+                  {currentUserEntry.totalPoints.toFixed(2)}
+                </td>
               </tr>
             </>
           )}
